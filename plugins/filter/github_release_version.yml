@@ -1,0 +1,44 @@
+DOCUMENTATION:
+  name: github_release_version
+  version_added: "2.13"
+  short_description: Get specific github release version(s)
+  description:
+    - Given a list of releases, find all releases that match provided criteria.
+  positional: _input, _criteria, _key
+  options:
+    _input:
+      description: The input filter list
+      type: list
+      required: true
+    _criteria:
+      description: The match criteria.  Can be 'latest', 'eq', 'gte', 'lte'.
+      type: str
+      required: true
+    _key:
+      description: |
+        Exclude if _matchtype is 'latest'.  _key can be x.y.z, x.y or x.  If _matchtype is 'eq', then
+        all versions that equal the key are returned.  If key is x.y.z, that is any version matching
+        that exact major.minor.point (including decorated version, if the option is set to include them).
+        If _matchtype is 'gte', any version greater-than-or-equal to _key are returned.  Again, if _key
+        is x.y.z, then any version x.y.n is returned where n >= z, as well as any version x.a.n where
+        a > y, as well as any version b.a.n where b > x.  If _matchtype is 'lte', the same logic applies
+        but for versions less-than-or-equal.
+      type: str
+    include_decorated_versions:
+      description: |
+        Whether the match criteria should consider versions with a "decorator".  This is a string following the version name.
+        For example, v0.60.0-alpha.0 or v0.53.2-rc.  The default is 'False'.  If this is set to True, then the applied criteria
+        treats these as the version without the decorator.
+      type: bool
+
+EXAMPLES: |
+  # latest, returns ['4.4.0']
+  {{ ['v1.1.0', 'v2.2.0', 'v3.3.0', 'v4.2.0', 'v4.2.2', 'v4.4.0', 'v4.5.0-alpha1'] | github_release_version('latest') }}
+
+  # get all versions 4.2.x, returns ['v4.2.0', 'v4.2.2']
+  {{ ['v1.1.0', 'v2.2.0', 'v3.3.0', 'v4.2.0', 'v4.2.2', 'v4.4.0', 'v4.5.0-alpha1'] | github_release_version('eq', '4.2') }}
+
+RETURN:
+  _value:
+    description: list of matching versions based on the criteria and key
+    type: str

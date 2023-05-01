@@ -1,3 +1,3 @@
 # Ansible Collection - blorticus.tools
 
-Documentation for the collection.
+This is a collection of plugins, libraries and roles that are useful for various Ansible tasks.
