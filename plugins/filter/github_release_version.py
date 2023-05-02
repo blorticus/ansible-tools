@@ -52,10 +52,11 @@ def github_release_version(input_to_process, criteria, *args, include_decorated_
     else:
         return [x['full_label'] for x in matching_versions]
 
+
 def sort_versions_ascending(versions):
-    '''Given a list of versions, return a list of dicts.  Each dict is keyed by 'stripped_version_label', 'full_label', 
+    '''Given a list of versions, return a list of dicts.  Each dict is keyed by 'stripped_version_label', 'full_label',
        'major', 'minor', 'point' and 'decorator'. for that version.  'major', 'minor' and 'point' are all integers.
-       The ordering is major.minor.point ascending.  The decorator does not include the leading dash and is the empty 
+       The ordering is major.minor.point ascending.  The decorator does not include the leading dash and is the empty
        string if there is no decorator present.  'stripped_version_label' is the version starting from vX.Y.Z or X.Y.Z
        (if there is no leading 'v').  'full_label' is the version name exactly as it is labeled.'''
     version_info = []
@@ -69,9 +70,9 @@ def sort_versions_ascending(versions):
             {
                 "stripped_version_label": m.group(),
                 "full_label": version,
-                "major": int(m.group('major')), 
-                "minor": int(m.group('minor')), 
-                "point": int(m.group('point')), 
+                "major": int(m.group('major')),
+                "minor": int(m.group('minor')),
+                "point": int(m.group('point')),
                 "decorator": '' if m.group('decorator') is None else m.group('decorator'),
             })
 
