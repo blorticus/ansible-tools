@@ -1,6 +1,15 @@
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
+import json
+import re
+import requests
+
+from ansible.errors import AnsibleError, AnsibleParserError
+from ansible.plugins.lookup import LookupBase
+from ansible.utils.display import Display
+
+
 DOCUMENTATION = r"""
   name: github_releases
   author: Vernon Wells <v.wells@f5.com>
@@ -24,53 +33,49 @@ RETURN = """
     elements: str
 """
 
-from ansible.errors import AnsibleError, AnsibleParserError
-from ansible.plugins.lookup import LookupBase
-from ansible.utils.display import Display
-
-import re, requests, json
-
 display = Display()
 
 class LookupModule(LookupBase):
     @staticmethod
     def perform_lookup(terms):
-      ret = []
-      for term in terms:
-          display.vvv(f"github_releases term: {term}")
+        '''Iterate through 'terms', which should be a list of strings of the format OWNER/REPO.  For each, retreive the set of releases.
+           In practice, this will have a satisfying result only if 'terms' has a single member.'''
+        ret = []
+        for term in terms:
+            display.vvv(f"github_releases term: {term}")
 
-          print(term)
+            print(term)
 
-          term_split_match = re.fullmatch(r'([^/]+)/([^/]+)', term)
+            term_split_match = re.fullmatch(r'([^/]+)/([^/]+)', term)
 
-          if term_split_match is None:
-            raise AnsibleParserError("github_release requires OWNER/REPO")
+            if term_split_match is None:
+                raise AnsibleParserError("github_release requires OWNER/REPO")
 
-          (owner, repository) = term_split_match.group(1, 2)
+            (owner, repository) = term_split_match.group(1, 2)
 
-          api_url = f"https://api.github.com/repos/{owner}/{repository}/releases"
+            api_url = f"https://api.github.com/repos/{owner}/{repository}/releases"
 
-          response = requests.get(api_url, allow_redirects=True)
+            response = requests.get(api_url, allow_redirects=True, timeout=30)
 
-          if response.status_code == 404:
-            raise AnsibleError(f"no such repository at github.com for {owner}/{repository}")
+            if response.status_code == 404:
+                raise AnsibleError(f"no such repository at github.com for {owner}/{repository}")
 
-          if response.status_code != 200:
-            raise AnsibleError(f"received response code {response.status_code} from GET request for {api_url}")
+            if response.status_code != 200:
+                raise AnsibleError(f"received response code {response.status_code} from GET request for {api_url}")
 
-          releases = json.loads(response.content)
+            releases = json.loads(response.content)
 
-          if not isinstance(releases, list):
-            raise AnsibleError(f"expected JSON element type list in response body, got ({type(releases)})")
+            if not isinstance(releases, list):
+                raise AnsibleError(f"expected JSON element type list in response body, got ({type(releases)})")
 
-          for release in releases:
-            if not isinstance(release, dict):
-              raise AnsibleError(f"expected JSON element type dict in response body, got ({type(release)})")
+            for release in releases:
+                if not isinstance(release, dict):
+                    raise AnsibleError(f"expected JSON element type dict in response body, got ({type(release)})")
 
-            if 'name' in release:
-              ret.append(release['name'])
+                if 'name' in release:
+                    ret.append(release['name'])
 
-      return ret
+        return ret
 
 
     def run(self, terms, variables=None, **kwargs):
