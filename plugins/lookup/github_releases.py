@@ -35,6 +35,7 @@ RETURN = """
 
 display = Display()
 
+
 class LookupModule(LookupBase):
     @staticmethod
     def perform_lookup(terms):
@@ -76,7 +77,6 @@ class LookupModule(LookupBase):
                     ret.append(release['name'])
 
         return ret
-
 
     def run(self, terms, variables=None, **kwargs):
         self.set_options(var_options=variables, direct=kwargs)
