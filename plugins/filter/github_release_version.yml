@@ -27,15 +27,21 @@ DOCUMENTATION:
     include_decorated_versions:
       description: |
         Whether the match criteria should consider versions with a "decorator".  This is a string following the version name.
-        For example, v0.60.0-alpha.0 or v0.53.2-rc.  The default is 'False'.  If this is set to True, then the applied criteria
+        For example, v0.60.0-alpha.0 or v0.53.2-rc.  The default is False.  If this is set to True, then the applied criteria
         treats these as the version without the decorator.
+      type: bool
+    normalize:
+      description: |
+        Remove all elaborations to semantic version (except the decoarator, if 'include_decorated_versions' is True).
+        When set To True, all returned versions will be X.Y.Z (excluding for example, a leading 'v' literal).  The
+        default is True.
       type: bool
 
 EXAMPLES: |
   # latest, returns ['4.4.0']
   {{ ['v1.1.0', 'v2.2.0', 'v3.3.0', 'v4.2.0', 'v4.2.2', 'v4.4.0', 'v4.5.0-alpha1'] | github_release_version('latest') }}
 
-  # get all versions 4.2.x, returns ['v4.2.0', 'v4.2.2']
+  # get all versions 4.2.x, returns ['4.2.0', '4.2.2']
   {{ ['v1.1.0', 'v2.2.0', 'v3.3.0', 'v4.2.0', 'v4.2.2', 'v4.4.0', 'v4.5.0-alpha1'] | github_release_version('eq', '4.2') }}
 
 RETURN:
